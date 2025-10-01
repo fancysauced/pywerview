@@ -42,7 +42,7 @@ import pywerview.formatters as fmt
 
 class LDAPRequester():
     def __init__(self, domain_controller, domain=str(), user=str(), password=str(),
-                 lmhash=str(), nthash=str(), do_simple=False, do_kerberos=False, 
+                 lmhash=str(), nthash=str(), do_simple=False, do_kerberos=False,
                  do_tls=False, user_cert=str(), user_key=str()):
         self._domain_controller = domain_controller
         self._domain = domain
