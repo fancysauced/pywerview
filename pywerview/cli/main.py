@@ -62,6 +62,8 @@ def main():
             '(KRB5CCNAME) based on target parameters. If valid credentials '
             'cannot be found, it will use the ones specified in the command '
             'line')
+    credentials_parser.add_argument('--simple-auth', action='store_true', dest='do_simple',
+            help='Force SIMPLE LDAP authentication')
 
     # Certificate authentication parser
     certificate_parser = argparse.ArgumentParser(add_help=False)

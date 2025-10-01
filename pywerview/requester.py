@@ -42,14 +42,15 @@ import pywerview.formatters as fmt
 
 class LDAPRequester():
     def __init__(self, domain_controller, domain=str(), user=str(), password=str(),
-                 lmhash=str(), nthash=str(), do_kerberos=False, do_tls=False,
-                 user_cert=str(), user_key=str()):
+                 lmhash=str(), nthash=str(), do_simple=False, do_kerberos=False, 
+                 do_tls=False, user_cert=str(), user_key=str()):
         self._domain_controller = domain_controller
         self._domain = domain
         self._user = user
         self._password = password
         self._lmhash = lmhash
         self._nthash = nthash
+        self._do_simple = do_simple
         self._do_kerberos = do_kerberos
         self._do_certificate = user_cert and user_key
         self._user_cert = user_cert
@@ -335,6 +336,9 @@ class LDAPRequester():
 
     def _do_simple_auth(self, server):
         self._logger.debug('LDAP authentication with SIMPLE: ldap_scheme = {0}'.format("ldaps" if server.ssl else "ldap"))
+        if self._password is None:
+            self._logger.critical('SIMPLE authentication only supports password')
+            sys.exit(-1)
         ldap_connection_kwargs = {'server': server, 'user': '{}@{}'.format(self._user, self._domain),
                                   'password': self._password, 'raise_exceptions': True, 'authentication': ldap3.SIMPLE}
 
@@ -428,6 +432,8 @@ class LDAPRequester():
             self._do_kerberos_auth(ldap_server)
         elif self._do_certificate:
             self._do_schannel_auth(ldap_server)
+        elif self._do_simple:
+            self._do_simple_auth(ldap_server)
         else:
             self._do_ntlm_auth(ldap_server)
 
@@ -636,7 +642,7 @@ class RPCRequester():
 
 class LDAPRPCRequester(LDAPRequester, RPCRequester):
     def __init__(self, target_computer, domain=str(), user=str(), password=str(),
-                 lmhash=str(), nthash=str(), do_kerberos=False, do_tls=False,
+                 lmhash=str(), nthash=str(), do_simple=False, do_kerberos=False, do_tls=False,
                  user_cert=str(), user_key=str(), domain_controller=str()):
         # If no domain controller was given, we assume that the user wants to
         # target a domain controller to perform LDAP requests against
@@ -644,10 +650,10 @@ class LDAPRPCRequester(LDAPRequester, RPCRequester):
             domain_controller = target_computer
 
         LDAPRequester.__init__(self, domain_controller, domain, user, password,
-                               lmhash, nthash, do_kerberos, do_tls,
+                               lmhash, nthash, do_simple, do_kerberos, do_tls,
                                user_cert, user_key)
 
-        if user_cert is not None and user_key is not None:
+        if user_cert is not None and user_key is not None and do_simple is not None:
             RPCRequester.__init__(self, target_computer, domain, user, password,
                                   lmhash, nthash, do_kerberos)
 
