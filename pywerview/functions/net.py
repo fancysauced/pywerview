@@ -761,7 +761,12 @@ class NetRequester(LDAPRPCRequester):
                             self._logger.warning('Member name = "{}" will be escaped'.format(member))
                             member = escape_filter_chars(member, encoding='utf-8')
                             dn_filter = '(distinguishedname={}){}'.format(member, custom_filter)
-                            members += self.get_adobject(custom_filter=dn_filter, queried_domain=self._queried_domain)
+                            result = self.get_adobject(custom_filter=dn_filter, queried_domain=self._queried_domain)
+                            if not result:
+                                self._logger.warning('{} not found on this domain, it may be from another domain or no longer exist'.format(member))
+                                # We create a dummy object
+                                result = [adobj.ADObject({'distinguishedname':member})]
+                            members += result
                     # The group doesn't have any members
                     except AttributeError:
                         self._logger.debug('The group doesn\'t have any members')
@@ -780,10 +785,49 @@ class NetRequester(LDAPRPCRequester):
                         self._logger.warning('Exception was raised while handling member_dn, falling back to empty string')
                         member_domain = str()
 
+                    attributes = dict()
+
+                    # Member is from another domain or no longer exist
+                    try:
+                        member.objectsid
+                    except AttributeError:
+                        self._logger.warning('Member is maybe from another domain')
+                        if queried_domain:
+                            attributes['groupdomain'] = queried_domain
+                        else:
+                            attributes['groupdomain'] = self._queried_domain
+                        attributes['groupname'] = group.name
+                        attributes['membername'] = str()
+                        attributes['memberdomain'] = str()
+                        attributes['useraccountcontrol'] = str()
+                        attributes['isgroup'] = bool()
+                        attributes['memberdn'] = member_dn
+                        attributes['objectsid'] = str()
+                        final_member.add_attributes(attributes)
+                        final_members.append(final_member)
+                        continue
+
+                    # Member is a Foreign Security Principal
+                    if 'foreignSecurityPrincipal' in member.objectclass:
+                        self._logger.warning('Member is a Foreign Security Principal')
+                        if queried_domain:
+                            attributes['groupdomain'] = queried_domain
+                        else:
+                            attributes['groupdomain'] = self._queried_domain
+                        attributes['groupname'] = group.name
+                        attributes['membername'] = str()
+                        attributes['memberdomain'] = str()
+                        attributes['useraccountcontrol'] = str()
+                        attributes['isgroup'] = bool()
+                        attributes['memberdn'] = member_dn
+                        attributes['objectsid'] = member.objectsid
+                        final_member.add_attributes(attributes)
+                        final_members.append(final_member)
+                        continue
+
                     # https://serverfault.com/questions/788888/what-does-an-alias-group-means-in-sid-context
                     is_group = (member.samaccounttype == 'GROUP_OBJECT') or (member.samaccounttype == 'ALIAS_OBJECT')
 
-                    attributes = dict()
                     if queried_domain:
                         attributes['groupdomain'] = queried_domain
                     else:
