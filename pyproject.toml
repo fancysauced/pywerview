@@ -1,6 +1,6 @@
-[project] 
+[project]
 name = 'pywerview'
-version = '0.7.3'
+version = '0.7.4'
 description = "A Python port of PowerSploit's PowerView"
 authors = [
   { name='Yannick Méheut', email='yannick@meheut.org' },
@@ -20,7 +20,7 @@ dependencies = [
     'pyasn1',
     'ldap3-bleeding-edge',
     'pycryptodome',
-    'impacket'
+    'impacket>=0.13.0'
 ]
 
 [project.optional-dependencies]

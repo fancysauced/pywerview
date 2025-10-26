@@ -59,7 +59,7 @@ Also, blah blah blah, don't use it for evil purposes.
 ## REQUIREMENTS
 
 * Python 3.6
-* `impacket`
+* `impacket` >= 0.13.0
 * `ldap3-bleeding-edge`
 * `pycryptodomex` (or `pycryptodome`)
 * (if you want the kerberos support) `gssapi` (Which requires `libkrb5-dev`)
