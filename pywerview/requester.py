@@ -113,7 +113,7 @@ class LDAPRequester():
                         0x532      : "ERROR_PASSWORD_EXPIRED",
                         0x533      : "ERROR_ACCOUNT_DISABLED",
                         0x701      : "ERROR_ACCOUNT_EXPIRED",
-                        0x703      : "ERROR_PASSWORD_MUST_CHANGE",
+                        0x773      : "ERROR_PASSWORD_MUST_CHANGE",
                         0x775      : "ERROR_ACCOUNT_LOCKED_OUT",
                         0x80090346 : "SEC_E_BAD_BINDINGS"
                       }
