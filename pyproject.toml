@@ -1,6 +1,6 @@
 [project]
 name = 'pywerview'
-version = '0.7.4'
+version = '0.7.5'
 description = "A Python port of PowerSploit's PowerView"
 authors = [
   { name='Yannick Méheut', email='yannick@meheut.org' },
